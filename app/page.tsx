@@ -1,9 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { MapPin, Heart, Camera, ChevronLeft, ChevronRight, ChevronDown, Copy } from "lucide-react"
+import { Heart, Camera, ChevronLeft, ChevronRight, ChevronDown, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import Image from "next/image"
 import dynamic from "next/dynamic"
 
@@ -21,7 +20,6 @@ export default function WeddingInvitation() {
   const [groomCollapsed, setGroomCollapsed] = useState(false)
   const [brideCollapsed, setBrideCollapsed] = useState(false)
   const [scrollY, setScrollY] = useState(0)
-  const [showMap, setShowMap] = useState(false)
 
   // 청구웨딩홀 좌표 (예시 - 실제 좌표로 변경 필요)
   const weddingHallLocation = {
@@ -351,29 +349,14 @@ export default function WeddingInvitation() {
 
             {/* Map Section */}
             <div className="mb-8">
-              {/* 지도 미리보기 */}
-              <Dialog open={showMap} onOpenChange={setShowMap}>
-                <DialogTrigger asChild>
-                  <div className="aspect-video bg-gray-100 rounded-lg mb-4 flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors">
-                    <div className="text-center">
-                      <MapPin className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm text-gray-600">지도 보기</p>
-                    </div>
-                  </div>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>청구 웨딩홀 위치</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4">
-                    <NaverMapComponent
-                      lat={weddingHallLocation.lat}
-                      lng={weddingHallLocation.lng}
-                      title={weddingHallLocation.name}
-                    />
-                  </div>
-                </DialogContent>
-              </Dialog>
+              {/* 네이버 지도 직접 표시 */}
+              <div className="mb-4">
+                <NaverMapComponent
+                  lat={weddingHallLocation.lat}
+                  lng={weddingHallLocation.lng}
+                  title={weddingHallLocation.name}
+                />
+              </div>
 
               <div className="flex space-x-2 mb-4">
                 <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={openNaverMap}>
