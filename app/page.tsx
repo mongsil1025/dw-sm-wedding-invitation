@@ -3,7 +3,17 @@
 import { useState, useEffect } from "react"
 import { MapPin, Heart, Camera, ChevronLeft, ChevronRight, ChevronDown, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import Image from "next/image"
+import dynamic from "next/dynamic"
+
+// 네이버 지도 컴포넌트를 동적으로 로드 (SSR 방지)
+const NaverMapComponent = dynamic(() => import("@/components/naver-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">지도 로딩 중...</div>
+  ),
+})
 
 export default function WeddingInvitation() {
   const [currentPhoto, setCurrentPhoto] = useState(1)
@@ -11,6 +21,14 @@ export default function WeddingInvitation() {
   const [groomCollapsed, setGroomCollapsed] = useState(false)
   const [brideCollapsed, setBrideCollapsed] = useState(false)
   const [scrollY, setScrollY] = useState(0)
+  const [showMap, setShowMap] = useState(false)
+
+  // 청구웨딩홀 좌표 (예시 - 실제 좌표로 변경 필요)
+  const weddingHallLocation = {
+    lat: 37.5665,
+    lng: 126.978,
+    name: "청구웨딩홀",
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,21 +40,20 @@ export default function WeddingInvitation() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  const openNaverMap = () => {
+    const url = `https://map.naver.com/v5/search/${encodeURIComponent(weddingHallLocation.name)}`
+    window.open(url, "_blank")
+  }
+
+  const openKakaoMap = () => {
+    const url = `https://map.kakao.com/link/search/${encodeURIComponent(weddingHallLocation.name)}`
+    window.open(url, "_blank")
+  }
+
   return (
     <div className="min-h-screen bg-amber-50">
       {/* Fixed gradient background that doesn't scroll */}
       <div className="fixed inset-0 bg-gradient-to-b from-amber-50 to-orange-100 z-0" style={{ height: "100vh" }}></div>
-
-      {/* Envelope at bottom - moves down with scroll speed */}
-      <div
-        className="fixed bottom-0 left-1/2 z-30"
-        style={{
-          transform: `translateX(-50%) translateY(${scrollY}px)`,
-        }}
-      >
-        <Image src="/envelope.png" alt="Envelope" width={384} height={230} className="w-96 max-w-sm h-auto" />
-      </div>
-
       {/* First Page - Fixed Behind (z-index lower) */}
       <div
         className="fixed inset-0 z-10 flex items-start justify-center"
@@ -209,13 +226,11 @@ export default function WeddingInvitation() {
                   >
                     <span className="text-sm font-medium text-gray-700">신랑측</span>
                     <ChevronDown
-                      className={`w-4 h-4 text-gray-500 transition-transform duration-300 ${groomCollapsed ? "rotate-180" : ""}`}
+                      className={`w-4 h-4 text-gray-500 transition-transform ${groomCollapsed ? "rotate-180" : ""}`}
                     />
                   </button>
 
-                  <div
-                    className={`overflow-hidden transition-all duration-300 ease-in-out ${groomCollapsed ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
-                  >
+                  {groomCollapsed && (
                     <div className="bg-white p-4 space-y-4">
                       <div className="space-y-2">
                         <p className="text-sm font-medium text-gray-800">신랑 장진혜</p>
@@ -250,7 +265,7 @@ export default function WeddingInvitation() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* 신부측 */}
@@ -261,13 +276,11 @@ export default function WeddingInvitation() {
                   >
                     <span className="text-sm font-medium text-gray-700">신부측</span>
                     <ChevronDown
-                      className={`w-4 h-4 text-gray-500 transition-transform duration-300 ${brideCollapsed ? "rotate-180" : ""}`}
+                      className={`w-4 h-4 text-gray-500 transition-transform ${brideCollapsed ? "rotate-180" : ""}`}
                     />
                   </button>
 
-                  <div
-                    className={`overflow-hidden transition-all duration-300 ease-in-out ${brideCollapsed ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
-                  >
+                  {brideCollapsed && (
                     <div className="bg-white p-4 space-y-4">
                       <div className="space-y-2">
                         <p className="text-sm font-medium text-gray-800">신부 조은정</p>
@@ -302,7 +315,7 @@ export default function WeddingInvitation() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -327,15 +340,35 @@ export default function WeddingInvitation() {
 
             {/* Map Section */}
             <div className="mb-8">
-              <div className="aspect-video bg-gray-100 rounded-lg mb-4 flex items-center justify-center">
-                <MapPin className="w-8 h-8 text-gray-400" />
-              </div>
+              {/* 지도 미리보기 */}
+              <Dialog open={showMap} onOpenChange={setShowMap}>
+                <DialogTrigger asChild>
+                  <div className="aspect-video bg-gray-100 rounded-lg mb-4 flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors">
+                    <div className="text-center">
+                      <MapPin className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm text-gray-600">지도 보기</p>
+                    </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>청구 웨딩홀 위치</DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-4">
+                    <NaverMapComponent
+                      lat={weddingHallLocation.lat}
+                      lng={weddingHallLocation.lng}
+                      title={weddingHallLocation.name}
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               <div className="flex space-x-2 mb-4">
-                <Button size="sm" variant="outline" className="flex-1 text-xs">
+                <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={openNaverMap}>
                   네이버 지도로 보기
                 </Button>
-                <Button size="sm" variant="outline" className="flex-1 text-xs">
+                <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={openKakaoMap}>
                   카카오맵으로 보기
                 </Button>
               </div>
