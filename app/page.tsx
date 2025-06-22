@@ -76,7 +76,7 @@ export default function WeddingInvitation() {
       </div>
 
       {/* Spacer to push content down - 더 큰 여백으로 2번 페이지 시작 위치 조정 */}
-      <div className="h-[35vh]"></div>
+      <div className="h-[28vh]"></div>
 
       {/* Second Page and Beyond - Scrollable In Front (z-index higher) */}
       <div className="relative z-20">
