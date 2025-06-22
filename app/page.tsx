@@ -41,12 +41,12 @@ export default function WeddingInvitation() {
   }, [])
 
   const openNaverMap = () => {
-    const url = `https://map.naver.com/v5/search/${encodeURIComponent(weddingHallLocation.name)}`
+    const url = `https://map.naver.com/v5/entry/place/1?c=${weddingHallLocation.lng},${weddingHallLocation.lat},15,0,0,0,dh`
     window.open(url, "_blank")
   }
 
   const openKakaoMap = () => {
-    const url = `https://map.kakao.com/link/search/${encodeURIComponent(weddingHallLocation.name)}`
+    const url = `https://map.kakao.com/link/map/${encodeURIComponent(weddingHallLocation.name)},${weddingHallLocation.lat},${weddingHallLocation.lng}`
     window.open(url, "_blank")
   }
 
