@@ -62,7 +62,7 @@ export default function WeddingInvitation() {
           transform: `translateX(-50%) translateY(${scrollY > 50 ? "100%" : "0%"})`,
         }}
       >
-        <Image src="/envelope.png" alt="Envelope" width={200} height={120} className="w-48 h-auto" />
+        <Image src="/envelope.png" alt="Envelope" width={384} height={230} className="w-96 max-w-sm h-auto" />
       </div>
 
       {/* First Page - Fixed Behind (z-index lower) */}
