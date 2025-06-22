@@ -1,6 +1,6 @@
 "use client"
 
-import { Container as MapDiv, NaverMap, Marker, useNavermaps } from "react-naver-maps"
+import { useEffect, useRef } from "react"
 
 interface NaverMapComponentProps {
   lat: number
@@ -8,31 +8,60 @@ interface NaverMapComponentProps {
   title: string
 }
 
+declare global {
+  interface Window {
+    naver: any
+  }
+}
+
 export default function NaverMapComponent({ lat, lng, title }: NaverMapComponentProps) {
-  const navermaps = useNavermaps()
+  const mapRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const initMap = () => {
+      if (!window.naver || !mapRef.current) return
+
+      const map = new window.naver.maps.Map(mapRef.current, {
+        center: new window.naver.maps.LatLng(lat, lng),
+        zoom: 16,
+        zoomControl: true,
+        zoomControlOptions: {
+          style: window.naver.maps.ZoomControlStyle.SMALL,
+          position: window.naver.maps.Position.TOP_RIGHT,
+        },
+        mapTypeControl: false,
+        scaleControl: false,
+        logoControl: false,
+        mapDataControl: false,
+      })
+
+      // 마커 추가
+      new window.naver.maps.Marker({
+        position: new window.naver.maps.LatLng(lat, lng),
+        map: map,
+        title: title,
+      })
+    }
+
+    // 네이버 지도 API 스크립트 로드
+    if (!window.naver) {
+      const script = document.createElement("script")
+      script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${process.env.NEXT_PUBLIC_NCP_CLIENT_ID}`
+      script.onload = initMap
+      document.head.appendChild(script)
+    } else {
+      initMap()
+    }
+  }, [lat, lng, title])
 
   return (
-    <MapDiv
+    <div
+      ref={mapRef}
       style={{
         width: "100%",
         height: "200px",
       }}
-    >
-      <NaverMap
-        defaultCenter={new navermaps.LatLng(lat, lng)}
-        defaultZoom={16}
-        zoomControl={true}
-        zoomControlOptions={{
-          style: navermaps.ZoomControlStyle.SMALL,
-          position: navermaps.Position.TOP_RIGHT,
-        }}
-        mapTypeControl={false}
-        scaleControl={false}
-        logoControl={false}
-        mapDataControl={false}
-      >
-        <Marker position={new navermaps.LatLng(lat, lng)} title={title} />
-      </NaverMap>
-    </MapDiv>
+      className="rounded-lg overflow-hidden"
+    />
   )
 }
