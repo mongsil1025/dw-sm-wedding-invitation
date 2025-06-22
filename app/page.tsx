@@ -21,11 +21,11 @@ export default function WeddingInvitation() {
   const [brideCollapsed, setBrideCollapsed] = useState(false)
   const [scrollY, setScrollY] = useState(0)
 
-  // 청구웨딩홀 좌표 (예시 - 실제 좌표로 변경 필요)
+  // 상록웨딩홀 좌표 (예시 - 실제 좌표로 변경 필요)
   const weddingHallLocation = {
-    lat: 37.5665,
-    lng: 126.978,
-    name: "청구웨딩홀",
+    lat: 37.5040168,
+    lng: 127.0429909,
+    name: "상록아트홀",
   }
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function WeddingInvitation() {
   }, [])
 
   const openNaverMap = () => {
-    const url = `https://map.naver.com/v5/entry/place/1?c=${weddingHallLocation.lng},${weddingHallLocation.lat},15,0,0,0,dh`
+    const url = `https://map.naver.com/p/search/%EC%83%81%EB%A1%9D%EC%95%84%ED%8A%B8%ED%99%80/place/366784007?c=15.00,0,0,0,dh`
     window.open(url, "_blank")
   }
 
@@ -164,7 +164,7 @@ export default function WeddingInvitation() {
             {/* Wedding Details */}
             <div className="text-center mb-8 space-y-2">
               <p className="text-sm text-gray-700 font-medium">2024년 10월 15일 토요일 오후 12시</p>
-              <p className="text-sm text-gray-600">청구 웨딩홀</p>
+              <p className="text-sm text-gray-600">상록아트홀</p>
             </div>
 
             {/* Divider */}
@@ -372,7 +372,7 @@ export default function WeddingInvitation() {
             <div className="mb-8 space-y-4">
               <div>
                 <h4 className="text-sm font-medium text-gray-800 mb-2">웨딩홀</h4>
-                <p className="text-sm text-gray-600">청구웨딩홀 3층 청구홀</p>
+                <p className="text-sm text-gray-600">상록아트홀 5층 아트홀</p>
                 <p className="text-sm text-gray-600">서울시 중구 을지로 청구빌딩에서 웨딩홀까지의 이용법</p>
                 <p className="text-sm text-gray-600">안내드립니다.</p>
               </div>
