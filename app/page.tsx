@@ -26,6 +26,17 @@ export default function WeddingInvitation() {
     <div className="min-h-screen bg-amber-50">
       {/* Fixed gradient background that doesn't scroll */}
       <div className="fixed inset-0 bg-gradient-to-b from-amber-50 to-orange-100 z-0" style={{ height: "100vh" }}></div>
+
+      {/* Envelope at bottom - disappears when scrolling */}
+      <div
+        className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-30 transition-transform duration-500 ease-out"
+        style={{
+          transform: `translateX(-50%) translateY(${scrollY > 50 ? "100%" : "0%"})`,
+        }}
+      >
+        <Image src="/envelope.png" alt="Envelope" width={200} height={120} className="w-48 h-auto" />
+      </div>
+
       {/* First Page - Fixed Behind (z-index lower) */}
       <div
         className="fixed inset-0 z-10 flex items-start justify-center"
