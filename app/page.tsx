@@ -235,11 +235,13 @@ export default function WeddingInvitation() {
                   >
                     <span className="text-sm font-medium text-gray-700">신랑측</span>
                     <ChevronDown
-                      className={`w-4 h-4 text-gray-500 transition-transform ${groomCollapsed ? "rotate-180" : ""}`}
+                      className={`w-4 h-4 text-gray-500 transition-transform duration-300 ${groomCollapsed ? "rotate-180" : ""}`}
                     />
                   </button>
 
-                  {groomCollapsed && (
+                  <div
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${groomCollapsed ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+                  >
                     <div className="bg-white p-4 space-y-4">
                       <div className="space-y-2">
                         <p className="text-sm font-medium text-gray-800">신랑 장진혜</p>
@@ -274,7 +276,7 @@ export default function WeddingInvitation() {
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
                 </div>
 
                 {/* 신부측 */}
@@ -285,11 +287,13 @@ export default function WeddingInvitation() {
                   >
                     <span className="text-sm font-medium text-gray-700">신부측</span>
                     <ChevronDown
-                      className={`w-4 h-4 text-gray-500 transition-transform ${brideCollapsed ? "rotate-180" : ""}`}
+                      className={`w-4 h-4 text-gray-500 transition-transform duration-300 ${brideCollapsed ? "rotate-180" : ""}`}
                     />
                   </button>
 
-                  {brideCollapsed && (
+                  <div
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${brideCollapsed ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+                  >
                     <div className="bg-white p-4 space-y-4">
                       <div className="space-y-2">
                         <p className="text-sm font-medium text-gray-800">신부 조은정</p>
@@ -324,7 +328,7 @@ export default function WeddingInvitation() {
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>
