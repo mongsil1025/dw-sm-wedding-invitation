@@ -56,7 +56,7 @@ export default function WeddingInvitation() {
 
             {/* Main Invitation Text */}
             <div className="text-center mb-12 space-y-3">
-              <p className="text-gray-700 leading-relaxed text-base">진혜과 은정의 결혼식에</p>
+              <p className="text-gray-700 leading-relaxed text-base">도원과 선민의 결혼식에</p>
               <p className="text-gray-700 leading-relaxed text-base">소중한 분들을 초대합니다.</p>
             </div>
 
