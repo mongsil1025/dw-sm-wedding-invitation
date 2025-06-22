@@ -28,7 +28,6 @@ export default function WeddingInvitation() {
       <div
         className="fixed inset-0 z-10 flex items-start justify-center p-4 pt-16"
         style={{
-          backgroundImage: "url(/background-pattern.png)",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -36,8 +35,13 @@ export default function WeddingInvitation() {
       >
         <div className="w-full px-4">
           {/* House-shaped Card - Much Taller */}
-          <div className="bg-white rounded-t-[60px] pt-12 px-8 pb-32 relative min-h-[80vh] max-w-sm mx-auto">
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[120px] border-r-[120px] border-b-[60px] border-l-transparent border-r-transparent border-b-white"></div>
+          <div
+            className="pt-12 px-8 pb-32 relative min-h-[80vh] max-w-sm mx-auto"
+            style={{
+              backgroundImage: "url('/background.png')",
+              backgroundSize: 'cover',
+              backgroundPosition: "center",
+            }}>
 
             {/* Candle Icon */}
             <div className="text-center mb-12">
@@ -70,7 +74,7 @@ export default function WeddingInvitation() {
       </div>
 
       {/* Spacer to push content down - 더 큰 여백으로 2번 페이지 시작 위치 조정 */}
-      <div className="h-[60vh]"></div>
+      <div className="h-[35vh]"></div>
 
       {/* Second Page and Beyond - Scrollable In Front (z-index higher) */}
       <div className="relative z-20">
