@@ -23,7 +23,9 @@ export default function WeddingInvitation() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-100">
+    <div className="min-h-screen bg-amber-50">
+      {/* Fixed gradient background that doesn't scroll */}
+      <div className="fixed inset-0 bg-gradient-to-b from-amber-50 to-orange-100 z-0" style={{ height: "100vh" }}></div>
       {/* First Page - Fixed Behind (z-index lower) */}
       <div
         className="fixed inset-0 z-10 flex items-start justify-center"
@@ -39,10 +41,10 @@ export default function WeddingInvitation() {
             className="pt-12 px-8 pb-32 relative min-h-[80vh] max-w-sm mx-auto"
             style={{
               backgroundImage: "url('/background.png')",
-              backgroundSize: 'cover',
+              backgroundSize: "cover",
               backgroundPosition: "center",
-            }}>
-
+            }}
+          >
             {/* Candle Icon */}
             <div className="text-center mb-12">
               <div className="w-12 h-12 mx-auto mb-4 relative">
