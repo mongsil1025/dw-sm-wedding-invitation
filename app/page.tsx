@@ -27,11 +27,11 @@ export default function WeddingInvitation() {
       {/* Fixed gradient background that doesn't scroll */}
       <div className="fixed inset-0 bg-gradient-to-b from-amber-50 to-orange-100 z-0" style={{ height: "100vh" }}></div>
 
-      {/* Envelope at bottom - disappears when scrolling */}
+      {/* Envelope at bottom - moves down with scroll speed */}
       <div
-        className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-30 transition-transform duration-500 ease-out"
+        className="fixed bottom-0 left-1/2 z-30"
         style={{
-          transform: `translateX(-50%) translateY(${scrollY > 50 ? "100%" : "0%"})`,
+          transform: `translateX(-50%) translateY(${scrollY}px)`,
         }}
       >
         <Image src="/envelope.png" alt="Envelope" width={200} height={120} className="w-48 h-auto" />
