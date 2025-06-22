@@ -26,7 +26,7 @@ export default function WeddingInvitation() {
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-100">
       {/* First Page - Fixed Behind (z-index lower) */}
       <div
-        className="fixed inset-0 z-10 flex items-start justify-center p-4 pt-16"
+        className="fixed inset-0 z-10 flex items-start justify-center"
         style={{
           backgroundSize: "cover",
           backgroundPosition: "center",
