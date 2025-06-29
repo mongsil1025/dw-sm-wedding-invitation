@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import dynamic from "next/dynamic"
 
+
+
 // 네이버 지도 컴포넌트를 동적으로 로드 (SSR 방지)
 const NaverMapComponent = dynamic(() => import("@/components/naver-map"), {
   ssr: false,
@@ -14,6 +16,13 @@ const NaverMapComponent = dynamic(() => import("@/components/naver-map"), {
   ),
 })
 
+// 카카오 SDK 타입 선언
+declare global {
+  interface Window {
+    Kakao: any
+  }
+}
+
 export default function WeddingInvitation() {
   const [currentPhoto, setCurrentPhoto] = useState(1)
   const totalPhotos = 6
@@ -21,6 +30,7 @@ export default function WeddingInvitation() {
   const [brideCollapsed, setBrideCollapsed] = useState(false)
   const [scrollY, setScrollY] = useState(0)
   const [isClient, setIsClient] = useState(false)
+  const [isKakaoReady, setIsKakaoReady] = useState(false)
 
   // 상록웨딩홀 좌표 (예시 - 실제 좌표로 변경 필요)
   const weddingHallLocation = {
@@ -28,6 +38,7 @@ export default function WeddingInvitation() {
     lng: 127.0429909,
     name: "상록아트홀",
   }
+
 
   useEffect(() => {
     setIsClient(true)
@@ -41,6 +52,66 @@ export default function WeddingInvitation() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  // 카카오 SDK 초기화 - 더 안전하고 확실한 방식
+  useEffect(() => {
+    const initKakaoSDK = async () => {
+      try {
+        // SDK 로딩 대기
+        let attempts = 0
+        const maxAttempts = 50 // 5초 대기
+
+        while (!window.Kakao && attempts < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 100))
+          attempts++
+        }
+
+        if (!window.Kakao) {
+          console.error("카카오 SDK 로딩 실패")
+          return
+        }
+
+        // 이미 초기화되어 있다면 cleanup 후 재초기화
+        if (window.Kakao.isInitialized()) {
+          window.Kakao.cleanup()
+        }
+
+        // 실제 카카오 앱 키 사용 (환경변수에서 가져오거나 직접 입력)
+        const kakaoKey = process.env.NEXT_PUBLIC_KAKAO_APP_KEY
+
+        if (!kakaoKey) {
+          console.error("카카오 앱 키가 설정되지 않았습니다.")
+          alert("카카오 공유 기능을 사용하려면 카카오 앱 키가 필요합니다.")
+          return
+        }
+
+        // SDK 초기화
+        window.Kakao.init(kakaoKey)
+        console.log("카카오 SDK 초기화 완료:", window.Kakao.isInitialized())
+
+        // Link 객체 확인 (추가 대기 시간)
+        let linkAttempts = 0
+        while (!window.Kakao.Link && linkAttempts < 20) {
+          await new Promise((resolve) => setTimeout(resolve, 100))
+          linkAttempts++
+        }
+
+        if (window.Kakao.Link) {
+          setIsKakaoReady(true)
+          console.log("카카오 Link 준비 완료")
+        } else {
+          console.error("카카오 Link 객체 로딩 실패")
+        }
+      } catch (error) {
+        console.error("카카오 SDK 초기화 중 오류:", error)
+      }
+    }
+
+    // 컴포넌트 마운트 후 SDK 초기화
+    if (typeof window !== "undefined") {
+      initKakaoSDK()
+    }
+  }, [])
+
   const openNaverMap = () => {
     const url = `https://map.naver.com/p/search/%EC%83%81%EB%A1%9D%EC%95%84%ED%8A%B8%ED%99%80/place/366784007?c=15.00,0,0,0,dh`
     window.open(url, "_blank")
@@ -49,6 +120,82 @@ export default function WeddingInvitation() {
   const openKakaoMap = () => {
     const url = `https://map.kakao.com/link/map/${encodeURIComponent(weddingHallLocation.name)},${weddingHallLocation.lat},${weddingHallLocation.lng}`
     window.open(url, "_blank")
+  }
+
+  // 카카오톡 공유하기 함수 - 더 상세한 오류 처리
+  const shareToKakao = () => {
+    try {
+      console.log("카카오 공유 시도...")
+      console.log("window.Kakao:", window.Kakao)
+      console.log("isInitialized:", window.Kakao?.isInitialized())
+      console.log("Link 객체:", window.Kakao?.Link)
+
+      if (!window.Kakao) {
+        alert("카카오 SDK가 로드되지 않았습니다. 페이지를 새로고침해주세요.")
+        return
+      }
+
+      if (!window.Kakao.isInitialized()) {
+        alert("카카오 SDK가 초기화되지 않았습니다. 카카오 앱 키를 확인해주세요.")
+        return
+      }
+
+      // 공유 실행
+      window.Kakao.Share.sendDefault({
+        objectType: "feed",
+        content: {
+          title: "💒 도원 ♥ 선민 결혼식 초대장",
+          description:
+            "2024년 10월 15일 토요일 오후 12시\n상록아트홀에서 열리는 결혼식에 초대합니다.\n\n저희 두 사람, 하나가 되어 함께 걸어갈 앞날을 약속합니다.\n소중한 분들의 따뜻한 사랑과 축복을 주세요.",
+          imageUrl: typeof window !== "undefined" ? window.location.origin + "/background.png" : "",
+          link: {
+            mobileWebUrl: typeof window !== "undefined" ? window.location.href : "",
+            webUrl: typeof window !== "undefined" ? window.location.href : "",
+          },
+        },
+        social: {
+          likeCount: 0,
+          commentCount: 0,
+        },
+        buttons: [
+          {
+            title: "초대장 보기",
+            link: {
+              mobileWebUrl: typeof window !== "undefined" ? window.location.href : "",
+              webUrl: typeof window !== "undefined" ? window.location.href : "",
+            },
+          },
+        ],
+      })
+    } catch (error) {
+      console.error("카카오톡 공유 오류:", error)
+      alert(`카카오톡 공유 중 오류가 발생했습니다: ${error.message}`)
+    }
+  }
+
+  // URL 복사하기 함수
+  const copyToClipboard = async () => {
+    try {
+      if (typeof window !== "undefined") {
+        await navigator.clipboard.writeText(window.location.href)
+        console.log("초대장 링크 복사")
+        
+      }
+    } catch (err) {
+      // 클립보드 API가 지원되지 않는 경우 fallback
+      try {
+        const textArea = document.createElement("textarea")
+        textArea.value = window.location.href
+        document.body.appendChild(textArea)
+        textArea.select()
+        document.execCommand("copy")
+        document.body.removeChild(textArea)
+        alert("초대장 링크가 복사되었습니다!")
+      } catch (fallbackError) {
+        console.error("클립보드 복사 실패:", fallbackError)
+        alert("링크 복사에 실패했습니다.")
+      }
+    }
   }
 
   return (
@@ -408,11 +555,20 @@ export default function WeddingInvitation() {
 
             {/* Share Button */}
             <div className="text-center">
-              <Button className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-full py-3 mb-4">
-                카카오톡으로 공유하기
-              </Button>
+              {isKakaoReady ? (
+                <Button
+                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-full py-3 mb-4"
+                  onClick={shareToKakao}
+                >
+                  카카오톡으로 공유하기
+                </Button>
+              ) : (
+                <Button className="w-full bg-gray-300 text-gray-500 rounded-full py-3 mb-4" disabled>
+                  카카오톡 공유 준비 중...
+                </Button>
+              )}
 
-              <Button variant="outline" className="w-full rounded-full py-3 bg-transparent">
+              <Button variant="outline" className="w-full rounded-full py-3 bg-transparent" onClick={copyToClipboard}>
                 URL 링크 복사하기
               </Button>
             </div>
