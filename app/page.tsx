@@ -210,7 +210,7 @@ export default function WeddingInvitation() {
         <div className="w-full px-4">
           {/* House-shaped Card - Much Taller */}
           <div
-            className="pt-12 px-8 pb-32 relative min-h-[80vh] max-w-sm mx-auto"
+            className="pt-12 px-8 pb-32 relative min-h-[100vh] w-full mx-auto"
             style={{
               backgroundImage: "url('/background.png')",
               backgroundSize: "cover",
