@@ -113,7 +113,7 @@ export default function WeddingInvitation() {
       </div>
 
       {/* Spacer to push content down - 2번 페이지 시작 위치를 날짜와 화살표 아래로 조정 */}
-      <div className="h-[85vh]"></div>
+      <div className="h-[65vh]"></div>
 
       {/* Second Page and Beyond - Scrollable In Front (z-index higher) */}
       <div className="relative z-20">
