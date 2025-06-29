@@ -5,8 +5,7 @@ import { Heart, Camera, ChevronLeft, ChevronRight, ChevronDown, Copy } from "luc
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import dynamic from "next/dynamic"
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+
 
 
 // 네이버 지도 컴포넌트를 동적으로 로드 (SSR 방지)
