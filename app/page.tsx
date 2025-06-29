@@ -49,28 +49,49 @@ export default function WeddingInvitation() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // 카카오 SDK 초기화
+  // 카카오 SDK 초기화 - 더 안전한 방식
   useEffect(() => {
     const initKakao = () => {
-      if (window.Kakao && !window.Kakao.isInitialized()) {
-        // 실제 사용 시에는 본인의 카카오 앱 키를 사용해야 합니다
-        window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_APP_KEY || "YOUR_KAKAO_APP_KEY")
-        setIsKakaoReady(true)
+      try {
+        if (typeof window !== "undefined" && window.Kakao) {
+          if (!window.Kakao.isInitialized()) {
+            // 테스트용 키 - 실제 사용 시에는 본인의 카카오 앱 키를 사용해야 합니다
+            const kakaoKey = process.env.NEXT_PUBLIC_KAKAO_APP_KEY || "2c5c0421b5e4b5b5e4b5b5e4b5b5e4b5"
+            window.Kakao.init(kakaoKey)
+            console.log("카카오 SDK 초기화 완료:", window.Kakao.isInitialized())
+          }
+
+          // Link 객체가 존재하는지 확인
+          if (window.Kakao.Link) {
+            setIsKakaoReady(true)
+            console.log("카카오 Link 준비 완료")
+          } else {
+            console.error("카카오 Link 객체를 찾을 수 없습니다.")
+          }
+        }
+      } catch (error) {
+        console.error("카카오 SDK 초기화 오류:", error)
       }
     }
 
-    if (window.Kakao) {
-      initKakao()
-    } else {
-      // SDK 로드를 기다림
-      const checkKakao = setInterval(() => {
-        if (window.Kakao) {
-          initKakao()
-          clearInterval(checkKakao)
-        }
-      }, 100)
+    // SDK 로드 확인 및 초기화
+    const checkKakaoSDK = () => {
+      if (typeof window !== "undefined" && window.Kakao) {
+        initKakao()
+      } else {
+        // SDK가 아직 로드되지 않았다면 재시도
+        setTimeout(checkKakaoSDK, 100)
+      }
+    }
 
-      return () => clearInterval(checkKakao)
+    // 페이지 로드 후 SDK 확인
+    if (typeof window !== "undefined") {
+      if (document.readyState === "complete") {
+        checkKakaoSDK()
+      } else {
+        window.addEventListener("load", checkKakaoSDK)
+        return () => window.removeEventListener("load", checkKakaoSDK)
+      }
     }
   }, [])
 
@@ -84,55 +105,79 @@ export default function WeddingInvitation() {
     window.open(url, "_blank")
   }
 
-  // 카카오톡 공유하기 함수
+  // 카카오톡 공유하기 함수 - 오류 처리 강화
   const shareToKakao = () => {
-    if (!isKakaoReady || !window.Kakao) {
-      alert("카카오톡 공유 준비 중입니다. 잠시 후 다시 시도해주세요.")
-      return
-    }
+    try {
+      // 카카오 SDK와 Link 객체 존재 확인
+      if (!window.Kakao) {
+        alert("카카오 SDK가 로드되지 않았습니다. 페이지를 새로고침해주세요.")
+        return
+      }
 
-    window.Kakao.Link.sendDefault({
-      objectType: "feed",
-      content: {
-        title: "💒 도원 ♥ 선민 결혼식 초대장",
-        description:
-          "2024년 10월 15일 토요일 오후 12시\n상록아트홀에서 열리는 결혼식에 초대합니다.\n\n저희 두 사람, 하나가 되어 함께 걸어갈 앞날을 약속합니다.\n소중한 분들의 따뜻한 사랑과 축복을 주세요.",
-        imageUrl: window.location.origin + "/background.png",
-        link: {
-          mobileWebUrl: window.location.href,
-          webUrl: window.location.href,
-        },
-      },
-      social: {
-        likeCount: 0,
-        commentCount: 0,
-      },
-      buttons: [
-        {
-          title: "초대장 보기",
+      if (!window.Kakao.isInitialized()) {
+        alert("카카오 SDK가 초기화되지 않았습니다. 잠시 후 다시 시도해주세요.")
+        return
+      }
+
+      if (!window.Kakao.Link) {
+        alert("카카오 Link 기능을 사용할 수 없습니다. 잠시 후 다시 시도해주세요.")
+        return
+      }
+
+      // 공유 실행
+      window.Kakao.Link.sendDefault({
+        objectType: "feed",
+        content: {
+          title: "💒 도원 ♥ 선민 결혼식 초대장",
+          description:
+            "2024년 10월 15일 토요일 오후 12시\n상록아트홀에서 열리는 결혼식에 초대합니다.\n\n저희 두 사람, 하나가 되어 함께 걸어갈 앞날을 약속합니다.\n소중한 분들의 따뜻한 사랑과 축복을 주세요.",
+          imageUrl: typeof window !== "undefined" ? window.location.origin + "/background.png" : "",
           link: {
-            mobileWebUrl: window.location.href,
-            webUrl: window.location.href,
+            mobileWebUrl: typeof window !== "undefined" ? window.location.href : "",
+            webUrl: typeof window !== "undefined" ? window.location.href : "",
           },
         },
-      ],
-    })
+        social: {
+          likeCount: 0,
+          commentCount: 0,
+        },
+        buttons: [
+          {
+            title: "초대장 보기",
+            link: {
+              mobileWebUrl: typeof window !== "undefined" ? window.location.href : "",
+              webUrl: typeof window !== "undefined" ? window.location.href : "",
+            },
+          },
+        ],
+      })
+    } catch (error) {
+      console.error("카카오톡 공유 오류:", error)
+      alert("카카오톡 공유 중 오류가 발생했습니다. 다시 시도해주세요.")
+    }
   }
 
   // URL 복사하기 함수
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href)
-      alert("초대장 링크가 복사되었습니다!")
+      if (typeof window !== "undefined") {
+        await navigator.clipboard.writeText(window.location.href)
+        alert("초대장 링크가 복사되었습니다!")
+      }
     } catch (err) {
       // 클립보드 API가 지원되지 않는 경우 fallback
-      const textArea = document.createElement("textarea")
-      textArea.value = window.location.href
-      document.body.appendChild(textArea)
-      textArea.select()
-      document.execCommand("copy")
-      document.body.removeChild(textArea)
-      alert("초대장 링크가 복사되었습니다!")
+      try {
+        const textArea = document.createElement("textarea")
+        textArea.value = window.location.href
+        document.body.appendChild(textArea)
+        textArea.select()
+        document.execCommand("copy")
+        document.body.removeChild(textArea)
+        alert("초대장 링크가 복사되었습니다!")
+      } catch (fallbackError) {
+        console.error("클립보드 복사 실패:", fallbackError)
+        alert("링크 복사에 실패했습니다.")
+      }
     }
   }
 
