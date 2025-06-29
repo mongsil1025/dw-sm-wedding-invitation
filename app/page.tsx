@@ -100,12 +100,12 @@ export default function WeddingInvitation() {
             </div>
 
             {/* Date */}
-            <div className="text-center mb-16">
+            <div className="text-center mb-4">
               <p className="text-lg font-medium text-gray-800">24.10.15.SAT</p>
             </div>
 
-            {/* Simple Arrow at bottom */}
-            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+            {/* Simple Arrow right below the date */}
+            <div className="text-center mb-16">
               <div className="text-gray-400 text-2xl">^</div>
             </div>
           </div>
