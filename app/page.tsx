@@ -105,7 +105,7 @@ export default function WeddingInvitation() {
             </div>
 
             {/* Simple Arrow right below the date */}
-            <div className="text-center mb-16">
+            <div className="text-center mb-10">
               <div className="text-gray-400 text-2xl">^</div>
             </div>
           </div>
@@ -113,7 +113,7 @@ export default function WeddingInvitation() {
       </div>
 
       {/* Spacer to push content down - 2번 페이지 시작 위치를 날짜와 화살표 아래로 조정 */}
-      <div className="h-[65vh]"></div>
+      <div className="h-[40vh]"></div>
 
       {/* Second Page and Beyond - Scrollable In Front (z-index higher) */}
       <div className="relative z-20">
