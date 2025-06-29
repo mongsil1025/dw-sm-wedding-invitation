@@ -4,6 +4,7 @@ import Script from "next/script"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 
+
 export const metadata: Metadata = {
   title: "도원 ♥ 선민 결혼식 초대장",
   description: "2024년 10월 15일 토요일 오후 12시, 상록아트홀에서 열리는 도원과 선민의 결혼식에 초대합니다.",
@@ -12,9 +13,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="ko">
       <head>

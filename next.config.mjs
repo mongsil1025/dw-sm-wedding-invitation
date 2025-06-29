@@ -14,6 +14,9 @@ const nextConfig = {
     domains: ['placeholder.svg'],
     unoptimized: true,
   },
+  env: {
+    NEXT_PUBLIC_KAKAO_APP_KEY: process.env.NEXT_PUBLIC_KAKAO_APP_KEY,
+  }
 }
 
 export default nextConfig
