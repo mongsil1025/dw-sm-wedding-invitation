@@ -20,6 +20,7 @@ export default function WeddingInvitation() {
   const [groomCollapsed, setGroomCollapsed] = useState(false)
   const [brideCollapsed, setBrideCollapsed] = useState(false)
   const [scrollY, setScrollY] = useState(0)
+  const [isClient, setIsClient] = useState(false)
 
   // 상록웨딩홀 좌표 (예시 - 실제 좌표로 변경 필요)
   const weddingHallLocation = {
@@ -29,6 +30,8 @@ export default function WeddingInvitation() {
   }
 
   useEffect(() => {
+    setIsClient(true)
+
     const handleScroll = () => {
       const currentScrollY = window.scrollY
       setScrollY(currentScrollY)
@@ -54,14 +57,16 @@ export default function WeddingInvitation() {
       <div className="fixed inset-0 bg-gradient-to-b from-amber-50 to-orange-100 z-0" style={{ height: "100vh" }}></div>
 
       {/* Envelope at bottom - disappears when scrolling */}
-      <div
-        className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-30 transition-transform duration-500 ease-out"
-        style={{
-          transform: `translateX(-50%) translateY(${scrollY > 50 ? "100%" : "0%"})`,
-        }}
-      >
-        <Image src="/envelope.png" alt="Envelope" width={384} height={230} className="w-96 max-w-sm h-auto" />
-      </div>
+      {isClient && (
+        <div
+          className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-30 transition-transform duration-500 ease-out"
+          style={{
+            transform: `translateX(-50%) translateY(${scrollY > 50 ? "100%" : "0%"})`,
+          }}
+        >
+          <Image src="/envelope.png" alt="Envelope" width={384} height={230} className="w-96 max-w-sm h-auto" />
+        </div>
+      )}
 
       {/* First Page - Fixed Behind (z-index lower) */}
       <div
@@ -363,10 +368,10 @@ export default function WeddingInvitation() {
               </div>
 
               <div className="flex space-x-2 mb-4">
-                <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={openNaverMap}>
+                <Button size="sm" variant="outline" className="flex-1 text-xs bg-transparent" onClick={openNaverMap}>
                   네이버 지도로 보기
                 </Button>
-                <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={openKakaoMap}>
+                <Button size="sm" variant="outline" className="flex-1 text-xs bg-transparent" onClick={openKakaoMap}>
                   카카오맵으로 보기
                 </Button>
               </div>
@@ -407,7 +412,7 @@ export default function WeddingInvitation() {
                 카카오톡으로 공유하기
               </Button>
 
-              <Button variant="outline" className="w-full rounded-full py-3">
+              <Button variant="outline" className="w-full rounded-full py-3 bg-transparent">
                 URL 링크 복사하기
               </Button>
             </div>
