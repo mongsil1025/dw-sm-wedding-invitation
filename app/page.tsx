@@ -5,6 +5,9 @@ import { Heart, Camera, ChevronLeft, ChevronRight, ChevronDown, Copy } from "luc
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import dynamic from "next/dynamic"
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 // 네이버 지도 컴포넌트를 동적으로 로드 (SSR 방지)
 const NaverMapComponent = dynamic(() => import("@/components/naver-map"), {
@@ -36,6 +39,7 @@ export default function WeddingInvitation() {
     lng: 127.0429909,
     name: "상록아트홀",
   }
+
 
   useEffect(() => {
     setIsClient(true)
@@ -137,13 +141,8 @@ export default function WeddingInvitation() {
         return
       }
 
-      if (!window.Kakao.Link) {
-        alert("카카오 Link 기능을 사용할 수 없습니다. 잠시 후 다시 시도해주세요.")
-        return
-      }
-
       // 공유 실행
-      window.Kakao.Link.sendDefault({
+      window.Kakao.Share.sendDefault({
         objectType: "feed",
         content: {
           title: "💒 도원 ♥ 선민 결혼식 초대장",
@@ -180,7 +179,8 @@ export default function WeddingInvitation() {
     try {
       if (typeof window !== "undefined") {
         await navigator.clipboard.writeText(window.location.href)
-        alert("초대장 링크가 복사되었습니다!")
+        console.log("초대장 링크 복사")
+        
       }
     } catch (err) {
       // 클립보드 API가 지원되지 않는 경우 fallback
