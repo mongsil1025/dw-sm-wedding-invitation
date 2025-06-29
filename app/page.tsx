@@ -14,20 +14,12 @@ const NaverMapComponent = dynamic(() => import("@/components/naver-map"), {
   ),
 })
 
-// 카카오 SDK 타입 선언
-declare global {
-  interface Window {
-    Kakao: any
-  }
-}
-
 export default function WeddingInvitation() {
   const [currentPhoto, setCurrentPhoto] = useState(1)
   const totalPhotos = 6
   const [groomCollapsed, setGroomCollapsed] = useState(false)
   const [brideCollapsed, setBrideCollapsed] = useState(false)
   const [scrollY, setScrollY] = useState(0)
-  const [isKakaoReady, setIsKakaoReady] = useState(false)
 
   // 상록웨딩홀 좌표 (예시 - 실제 좌표로 변경 필요)
   const weddingHallLocation = {
@@ -46,31 +38,6 @@ export default function WeddingInvitation() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // 카카오 SDK 초기화
-  useEffect(() => {
-    const initKakao = () => {
-      if (window.Kakao && !window.Kakao.isInitialized()) {
-        // 실제 사용 시에는 본인의 카카오 앱 키를 사용해야 합니다
-        window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_APP_KEY || "YOUR_KAKAO_APP_KEY")
-        setIsKakaoReady(true)
-      }
-    }
-
-    if (window.Kakao) {
-      initKakao()
-    } else {
-      // SDK 로드를 기다림
-      const checkKakao = setInterval(() => {
-        if (window.Kakao) {
-          initKakao()
-          clearInterval(checkKakao)
-        }
-      }, 100)
-
-      return () => clearInterval(checkKakao)
-    }
-  }, [])
-
   const openNaverMap = () => {
     const url = `https://map.naver.com/p/search/%EC%83%81%EB%A1%9D%EC%95%84%ED%8A%B8%ED%99%80/place/366784007?c=15.00,0,0,0,dh`
     window.open(url, "_blank")
@@ -79,58 +46,6 @@ export default function WeddingInvitation() {
   const openKakaoMap = () => {
     const url = `https://map.kakao.com/link/map/${encodeURIComponent(weddingHallLocation.name)},${weddingHallLocation.lat},${weddingHallLocation.lng}`
     window.open(url, "_blank")
-  }
-
-  // 카카오톡 공유하기 함수
-  const shareToKakao = () => {
-    if (!isKakaoReady || !window.Kakao) {
-      alert("카카오톡 공유 준비 중입니다. 잠시 후 다시 시도해주세요.")
-      return
-    }
-
-    window.Kakao.Link.sendDefault({
-      objectType: "feed",
-      content: {
-        title: "💒 도원 ♥ 선민 결혼식 초대장",
-        description:
-          "2024년 10월 15일 토요일 오후 12시\n상록아트홀에서 열리는 결혼식에 초대합니다.\n\n저희 두 사람, 하나가 되어 함께 걸어갈 앞날을 약속합니다.\n소중한 분들의 따뜻한 사랑과 축복을 주세요.",
-        imageUrl: window.location.origin + "/background.png",
-        link: {
-          mobileWebUrl: window.location.href,
-          webUrl: window.location.href,
-        },
-      },
-      social: {
-        likeCount: 0,
-        commentCount: 0,
-      },
-      buttons: [
-        {
-          title: "초대장 보기",
-          link: {
-            mobileWebUrl: window.location.href,
-            webUrl: window.location.href,
-          },
-        },
-      ],
-    })
-  }
-
-  // URL 복사하기 함수
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href)
-      alert("초대장 링크가 복사되었습니다!")
-    } catch (err) {
-      // 클립보드 API가 지원되지 않는 경우 fallback
-      const textArea = document.createElement("textarea")
-      textArea.value = window.location.href
-      document.body.appendChild(textArea)
-      textArea.select()
-      document.execCommand("copy")
-      document.body.removeChild(textArea)
-      alert("초대장 링크가 복사되었습니다!")
-    }
   }
 
   return (
@@ -488,14 +403,11 @@ export default function WeddingInvitation() {
 
             {/* Share Button */}
             <div className="text-center">
-              <Button
-                className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-full py-3 mb-4"
-                onClick={shareToKakao}
-              >
+              <Button className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-full py-3 mb-4">
                 카카오톡으로 공유하기
               </Button>
 
-              <Button variant="outline" className="w-full rounded-full py-3 bg-transparent" onClick={copyToClipboard}>
+              <Button variant="outline" className="w-full rounded-full py-3 bg-transparent">
                 URL 링크 복사하기
               </Button>
             </div>
