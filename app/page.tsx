@@ -112,8 +112,8 @@ export default function WeddingInvitation() {
         </div>
       </div>
 
-      {/* Spacer to push content down - 더 큰 여백으로 2번 페이지 시작 위치 조정 */}
-      <div className="h-[28vh]"></div>
+      {/* Spacer to push content down - 2번 페이지 시작 위치를 날짜와 화살표 아래로 조정 */}
+      <div className="h-[85vh]"></div>
 
       {/* Second Page and Beyond - Scrollable In Front (z-index higher) */}
       <div className="relative z-20">
@@ -363,10 +363,10 @@ export default function WeddingInvitation() {
               </div>
 
               <div className="flex space-x-2 mb-4">
-                <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={openNaverMap}>
+                <Button size="sm" variant="outline" className="flex-1 text-xs bg-transparent" onClick={openNaverMap}>
                   네이버 지도로 보기
                 </Button>
-                <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={openKakaoMap}>
+                <Button size="sm" variant="outline" className="flex-1 text-xs bg-transparent" onClick={openKakaoMap}>
                   카카오맵으로 보기
                 </Button>
               </div>
@@ -407,7 +407,7 @@ export default function WeddingInvitation() {
                 카카오톡으로 공유하기
               </Button>
 
-              <Button variant="outline" className="w-full rounded-full py-3">
+              <Button variant="outline" className="w-full rounded-full py-3 bg-transparent">
                 URL 링크 복사하기
               </Button>
             </div>
