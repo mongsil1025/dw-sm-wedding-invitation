@@ -49,49 +49,63 @@ export default function WeddingInvitation() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // 카카오 SDK 초기화 - 더 안전한 방식
+  // 카카오 SDK 초기화 - 더 안전하고 확실한 방식
   useEffect(() => {
-    const initKakao = () => {
+    const initKakaoSDK = async () => {
       try {
-        if (typeof window !== "undefined" && window.Kakao) {
-          if (!window.Kakao.isInitialized()) {
-            // 테스트용 키 - 실제 사용 시에는 본인의 카카오 앱 키를 사용해야 합니다
-            const kakaoKey = process.env.NEXT_PUBLIC_KAKAO_APP_KEY || "2c5c0421b5e4b5b5e4b5b5e4b5b5e4b5"
-            window.Kakao.init(kakaoKey)
-            console.log("카카오 SDK 초기화 완료:", window.Kakao.isInitialized())
-          }
+        // SDK 로딩 대기
+        let attempts = 0
+        const maxAttempts = 50 // 5초 대기
 
-          // Link 객체가 존재하는지 확인
-          if (window.Kakao.Link) {
-            setIsKakaoReady(true)
-            console.log("카카오 Link 준비 완료")
-          } else {
-            console.error("카카오 Link 객체를 찾을 수 없습니다.")
-          }
+        while (!window.Kakao && attempts < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 100))
+          attempts++
+        }
+
+        if (!window.Kakao) {
+          console.error("카카오 SDK 로딩 실패")
+          return
+        }
+
+        // 이미 초기화되어 있다면 cleanup 후 재초기화
+        if (window.Kakao.isInitialized()) {
+          window.Kakao.cleanup()
+        }
+
+        // 실제 카카오 앱 키 사용 (환경변수에서 가져오거나 직접 입력)
+        const kakaoKey = process.env.NEXT_PUBLIC_KAKAO_APP_KEY
+
+        if (!kakaoKey) {
+          console.error("카카오 앱 키가 설정되지 않았습니다.")
+          alert("카카오 공유 기능을 사용하려면 카카오 앱 키가 필요합니다.")
+          return
+        }
+
+        // SDK 초기화
+        window.Kakao.init(kakaoKey)
+        console.log("카카오 SDK 초기화 완료:", window.Kakao.isInitialized())
+
+        // Link 객체 확인 (추가 대기 시간)
+        let linkAttempts = 0
+        while (!window.Kakao.Link && linkAttempts < 20) {
+          await new Promise((resolve) => setTimeout(resolve, 100))
+          linkAttempts++
+        }
+
+        if (window.Kakao.Link) {
+          setIsKakaoReady(true)
+          console.log("카카오 Link 준비 완료")
+        } else {
+          console.error("카카오 Link 객체 로딩 실패")
         }
       } catch (error) {
-        console.error("카카오 SDK 초기화 오류:", error)
+        console.error("카카오 SDK 초기화 중 오류:", error)
       }
     }
 
-    // SDK 로드 확인 및 초기화
-    const checkKakaoSDK = () => {
-      if (typeof window !== "undefined" && window.Kakao) {
-        initKakao()
-      } else {
-        // SDK가 아직 로드되지 않았다면 재시도
-        setTimeout(checkKakaoSDK, 100)
-      }
-    }
-
-    // 페이지 로드 후 SDK 확인
+    // 컴포넌트 마운트 후 SDK 초기화
     if (typeof window !== "undefined") {
-      if (document.readyState === "complete") {
-        checkKakaoSDK()
-      } else {
-        window.addEventListener("load", checkKakaoSDK)
-        return () => window.removeEventListener("load", checkKakaoSDK)
-      }
+      initKakaoSDK()
     }
   }, [])
 
@@ -105,17 +119,21 @@ export default function WeddingInvitation() {
     window.open(url, "_blank")
   }
 
-  // 카카오톡 공유하기 함수 - 오류 처리 강화
+  // 카카오톡 공유하기 함수 - 더 상세한 오류 처리
   const shareToKakao = () => {
     try {
-      // 카카오 SDK와 Link 객체 존재 확인
+      console.log("카카오 공유 시도...")
+      console.log("window.Kakao:", window.Kakao)
+      console.log("isInitialized:", window.Kakao?.isInitialized())
+      console.log("Link 객체:", window.Kakao?.Link)
+
       if (!window.Kakao) {
         alert("카카오 SDK가 로드되지 않았습니다. 페이지를 새로고침해주세요.")
         return
       }
 
       if (!window.Kakao.isInitialized()) {
-        alert("카카오 SDK가 초기화되지 않았습니다. 잠시 후 다시 시도해주세요.")
+        alert("카카오 SDK가 초기화되지 않았습니다. 카카오 앱 키를 확인해주세요.")
         return
       }
 
@@ -153,7 +171,7 @@ export default function WeddingInvitation() {
       })
     } catch (error) {
       console.error("카카오톡 공유 오류:", error)
-      alert("카카오톡 공유 중 오류가 발생했습니다. 다시 시도해주세요.")
+      alert(`카카오톡 공유 중 오류가 발생했습니다: ${error.message}`)
     }
   }
 
@@ -538,12 +556,18 @@ export default function WeddingInvitation() {
 
             {/* Share Button */}
             <div className="text-center">
-              <Button
-                className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-full py-3 mb-4"
-                onClick={shareToKakao}
-              >
-                카카오톡으로 공유하기
-              </Button>
+              {isKakaoReady ? (
+                <Button
+                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-full py-3 mb-4"
+                  onClick={shareToKakao}
+                >
+                  카카오톡으로 공유하기
+                </Button>
+              ) : (
+                <Button className="w-full bg-gray-300 text-gray-500 rounded-full py-3 mb-4" disabled>
+                  카카오톡 공유 준비 중...
+                </Button>
+              )}
 
               <Button variant="outline" className="w-full rounded-full py-3 bg-transparent" onClick={copyToClipboard}>
                 URL 링크 복사하기
