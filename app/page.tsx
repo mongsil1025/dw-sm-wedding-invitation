@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import dynamic from "next/dynamic"
 
+
+
 // 네이버 지도 컴포넌트를 동적으로 로드 (SSR 방지)
 const NaverMapComponent = dynamic(() => import("@/components/naver-map"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center font-wedding-light">
-      지도 로딩 중...
-    </div>
+    <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">지도 로딩 중...</div>
   ),
 })
 
@@ -39,6 +39,7 @@ export default function WeddingInvitation() {
     name: "상록아트홀",
   }
 
+
   useEffect(() => {
     setIsClient(true)
 
@@ -51,49 +52,63 @@ export default function WeddingInvitation() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // 카카오 SDK 초기화 - 더 안전한 방식
+  // 카카오 SDK 초기화 - 더 안전하고 확실한 방식
   useEffect(() => {
-    const initKakao = () => {
+    const initKakaoSDK = async () => {
       try {
-        if (typeof window !== "undefined" && window.Kakao) {
-          if (!window.Kakao.isInitialized()) {
-            // 테스트용 키 - 실제 사용 시에는 본인의 카카오 앱 키를 사용해야 합니다
-            const kakaoKey = process.env.NEXT_PUBLIC_KAKAO_APP_KEY || "2c5c0421b5e4b5b5e4b5b5e4b5b5e4b5"
-            window.Kakao.init(kakaoKey)
-            console.log("카카오 SDK 초기화 완료:", window.Kakao.isInitialized())
-          }
+        // SDK 로딩 대기
+        let attempts = 0
+        const maxAttempts = 50 // 5초 대기
 
-          // Link 객체가 존재하는지 확인
-          if (window.Kakao.Link) {
-            setIsKakaoReady(true)
-            console.log("카카오 Link 준비 완료")
-          } else {
-            console.error("카카오 Link 객체를 찾을 수 없습니다.")
-          }
+        while (!window.Kakao && attempts < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 100))
+          attempts++
+        }
+
+        if (!window.Kakao) {
+          console.error("카카오 SDK 로딩 실패")
+          return
+        }
+
+        // 이미 초기화되어 있다면 cleanup 후 재초기화
+        if (window.Kakao.isInitialized()) {
+          window.Kakao.cleanup()
+        }
+
+        // 실제 카카오 앱 키 사용 (환경변수에서 가져오거나 직접 입력)
+        const kakaoKey = process.env.NEXT_PUBLIC_KAKAO_APP_KEY
+
+        if (!kakaoKey) {
+          console.error("카카오 앱 키가 설정되지 않았습니다.")
+          alert("카카오 공유 기능을 사용하려면 카카오 앱 키가 필요합니다.")
+          return
+        }
+
+        // SDK 초기화
+        window.Kakao.init(kakaoKey)
+        console.log("카카오 SDK 초기화 완료:", window.Kakao.isInitialized())
+
+        // Link 객체 확인 (추가 대기 시간)
+        let linkAttempts = 0
+        while (!window.Kakao.Link && linkAttempts < 20) {
+          await new Promise((resolve) => setTimeout(resolve, 100))
+          linkAttempts++
+        }
+
+        if (window.Kakao.Link) {
+          setIsKakaoReady(true)
+          console.log("카카오 Link 준비 완료")
+        } else {
+          console.error("카카오 Link 객체 로딩 실패")
         }
       } catch (error) {
-        console.error("카카오 SDK 초기화 오류:", error)
+        console.error("카카오 SDK 초기화 중 오류:", error)
       }
     }
 
-    // SDK 로드 확인 및 초기화
-    const checkKakaoSDK = () => {
-      if (typeof window !== "undefined" && window.Kakao) {
-        initKakao()
-      } else {
-        // SDK가 아직 로드되지 않았다면 재시도
-        setTimeout(checkKakaoSDK, 100)
-      }
-    }
-
-    // 페이지 로드 후 SDK 확인
+    // 컴포넌트 마운트 후 SDK 초기화
     if (typeof window !== "undefined") {
-      if (document.readyState === "complete") {
-        checkKakaoSDK()
-      } else {
-        window.addEventListener("load", checkKakaoSDK)
-        return () => window.removeEventListener("load", checkKakaoSDK)
-      }
+      initKakaoSDK()
     }
   }, [])
 
@@ -107,24 +122,23 @@ export default function WeddingInvitation() {
     window.open(url, "_blank")
   }
 
-  // 카카오톡 공유하기 함수 - 오류 처리 강화
+  // 카카오톡 공유하기 함수 - 더 상세한 오류 처리
   const shareToKakao = () => {
     try {
-      // 카카오 SDK와 Link 객체 존재 확인
+      console.log("카카오 공유 시도...")
+      console.log("window.Kakao:", window.Kakao)
+      console.log("isInitialized:", window.Kakao?.isInitialized())
+      console.log("Link 객체:", window.Kakao?.Link)
+
       if (!window.Kakao) {
         alert("카카오 SDK가 로드되지 않았습니다. 페이지를 새로고침해주세요.")
         return
       }
 
       if (!window.Kakao.isInitialized()) {
-        alert("카카오 SDK가 초기화되지 않았습니다. 잠시 후 다시 시도해주세요.")
+        alert("카카오 SDK가 초기화되지 않았습니다. 카카오 앱 키를 확인해주세요.")
         return
       }
-
-      // if (!window.Kakao.Link) {
-      //   alert("카카오 Link 기능을 사용할 수 없습니다. 잠시 후 다시 시도해주세요.")
-      //   return
-      // }
 
       // 공유 실행
       window.Kakao.Share.sendDefault({
@@ -155,7 +169,7 @@ export default function WeddingInvitation() {
       })
     } catch (error) {
       console.error("카카오톡 공유 오류:", error)
-      alert("카카오톡 공유 중 오류가 발생했습니다. 다시 시도해주세요.")
+      alert(`카카오톡 공유 중 오류가 발생했습니다: ${error.message}`)
     }
   }
 
@@ -164,7 +178,8 @@ export default function WeddingInvitation() {
     try {
       if (typeof window !== "undefined") {
         await navigator.clipboard.writeText(window.location.href)
-        alert("초대장 링크가 복사되었습니다!")
+        console.log("초대장 링크 복사")
+        
       }
     } catch (err) {
       // 클립보드 API가 지원되지 않는 경우 fallback
@@ -220,25 +235,25 @@ export default function WeddingInvitation() {
             }}
           >
             {/* Candle Icon */}
-            <div className="text-center mb-10">
+            <div className="text-center mb-12">
               <div className="w-12 h-12 mx-auto mb-4 relative">
                 <div className="w-2 h-8 bg-amber-200 mx-auto rounded-full"></div>
                 <div className="w-4 h-4 bg-orange-400 rounded-full mx-auto -mt-2 relative">
                   <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-3 bg-orange-500 rounded-full animate-pulse"></div>
                 </div>
               </div>
-              <p className="text-sm text-gray-600 font-wedding-title">Wedding Invitation</p>
+              <p className="text-sm text-gray-600 font-light">Wedding Invitation</p>
             </div>
 
             {/* Main Invitation Text */}
-            <div className="text-center mb-8">
-              <p className="text-gray-700 leading-relaxed text-lg font-wedding-elegant">도원과 선민의 결혼식에</p>
-              <p className="text-gray-700 leading-relaxed text-lg font-wedding-elegant">소중한 분들을 초대합니다.</p>
+            <div className="text-center mb-12 space-y-3">
+              <p className="text-gray-700 leading-relaxed text-base">도원과 선민의 결혼식에</p>
+              <p className="text-gray-700 leading-relaxed text-base">소중한 분들을 초대합니다.</p>
             </div>
 
             {/* Date */}
             <div className="text-center mb-4">
-              <p className="text-xl font-wedding-elegant text-gray-800">25.10.18.SAT</p>
+              <p className="text-lg font-medium text-gray-800">24.10.15.SAT</p>
             </div>
 
             {/* Simple Arrow right below the date */}
@@ -278,11 +293,11 @@ export default function WeddingInvitation() {
             </div>
 
             {/* Message */}
-            <div className="text-center mb-8 space-y-3">
-              <p className="text-sm text-gray-600 font-wedding-elegant">저희 두 사람, 하나가 되어</p>
-              <p className="text-sm text-gray-600 font-wedding-elegant">함께 걸어갈 앞날을 약속합니다.</p>
-              <p className="text-sm text-gray-600 font-wedding-elegant">소중한 분들의 따뜻한 사랑과</p>
-              <p className="text-sm text-gray-600 font-wedding-elegant">축복을 주세요.</p>
+            <div className="text-center mb-8 space-y-2">
+              <p className="text-sm text-gray-600">저희 두 사람, 하나가 되어</p>
+              <p className="text-sm text-gray-600">함께 걸어갈 앞날을 약속합니다.</p>
+              <p className="text-sm text-gray-600">소중한 분들의 따뜻한 사랑과</p>
+              <p className="text-sm text-gray-600">축복을 주세요.</p>
             </div>
 
             {/* Divider */}
@@ -292,10 +307,16 @@ export default function WeddingInvitation() {
 
             {/* Names */}
             <div className="text-center mb-8">
-              <div className="space-y-3">
-                <p className="text-sm text-gray-600 font-wedding-title">신랑측 • 김○○ 의 아들 김진혜</p>
-                <p className="text-sm text-gray-600 font-wedding-title">신부측 • 박○○ 의 딸 박은정</p>
+              <div className="space-y-2">
+                <p className="text-sm text-gray-600">신랑측 • 김○○ 의 아들 김진혜</p>
+                <p className="text-sm text-gray-600">신부측 • 박○○ 의 딸 박은정</p>
               </div>
+            </div>
+
+            {/* Wedding Details */}
+            <div className="text-center mb-8 space-y-2">
+              <p className="text-sm text-gray-700 font-medium">2024년 10월 15일 토요일 오후 12시</p>
+              <p className="text-sm text-gray-600">상록아트홀</p>
             </div>
 
             {/* Divider */}
@@ -303,18 +324,11 @@ export default function WeddingInvitation() {
               <div className="w-16 h-px bg-gray-300"></div>
             </div>
 
-            {/* Wedding Details */}
-            <div className="text-center mb-8 space-y-2">
-              <p className="text-sm text-gray-700 font-wedding-bold">2024년 10월 15일 토요일 오후 12시</p>
-              <p className="text-sm text-gray-600 font-wedding-modern">상록아트홀</p>
-            </div>
-
-
             {/* Gallery Section */}
             <div className="mb-8">
               <div className="text-center mb-6">
                 <Camera className="w-6 h-6 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm text-gray-600 font-wedding-light">Moment of love</p>
+                <p className="text-sm text-gray-600">Moment of love</p>
               </div>
 
               <div className="relative">
@@ -337,7 +351,7 @@ export default function WeddingInvitation() {
                     <ChevronLeft className="w-5 h-5 text-gray-400" />
                   </button>
 
-                  <span className="text-sm text-gray-500 font-wedding-modern">
+                  <span className="text-sm text-gray-500">
                     {currentPhoto}/{totalPhotos}
                   </span>
 
@@ -361,7 +375,7 @@ export default function WeddingInvitation() {
             <div className="mb-8">
               <div className="text-center mb-6">
                 <div className="text-2xl mb-2">👉</div>
-                <p className="text-sm text-gray-600 font-wedding-modern">마음 전하실 곳</p>
+                <p className="text-sm text-gray-600">마음 전하실 곳</p>
               </div>
 
               <div className="space-y-4">
@@ -541,12 +555,18 @@ export default function WeddingInvitation() {
 
             {/* Share Button */}
             <div className="text-center">
-              <Button
-                className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-full py-3 mb-4"
-                onClick={shareToKakao}
-              >
-                카카오톡으로 공유하기
-              </Button>
+              {isKakaoReady ? (
+                <Button
+                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-full py-3 mb-4"
+                  onClick={shareToKakao}
+                >
+                  카카오톡으로 공유하기
+                </Button>
+              ) : (
+                <Button className="w-full bg-gray-300 text-gray-500 rounded-full py-3 mb-4" disabled>
+                  카카오톡 공유 준비 중...
+                </Button>
+              )}
 
               <Button variant="outline" className="w-full rounded-full py-3 bg-transparent" onClick={copyToClipboard}>
                 URL 링크 복사하기

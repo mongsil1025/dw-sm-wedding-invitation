@@ -23,7 +23,7 @@ export default function NaverMapComponent({ lat, lng, title }: NaverMapComponent
 
       const map = new window.naver.maps.Map(mapRef.current, {
         center: new window.naver.maps.LatLng(lat, lng),
-        zoom: 14,
+        zoom: 16,
         zoomControl: true,
         zoomControlOptions: {
           style: window.naver.maps.ZoomControlStyle.SMALL,
